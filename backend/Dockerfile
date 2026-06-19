@@ -31,5 +31,5 @@ ENV PYTHONPATH=/app/backend
 
 EXPOSE 8000
 
-# Bind to PORT env variable supplied by Railway
+# Bind to PORT env variable supplied by hosting provider
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
