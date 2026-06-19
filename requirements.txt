@@ -13,3 +13,5 @@ uvicorn
 python-multipart
 sqlalchemy
 alembic
+python-jose
+bcrypt
