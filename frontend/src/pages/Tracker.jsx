@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, Edit2, Trash2, ExternalLink, Activity, MessageSquare, User, Sparkles, BarChart2, CheckCircle2, XCircle } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8000/api' : '/api');
 
 const getPortalColor = (portalId) => {
   const normalized = portalId.toLowerCase();

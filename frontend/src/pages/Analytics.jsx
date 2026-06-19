@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart2, TrendingUp, Target, Zap, Award, ArrowUpRight, Briefcase, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8000/api' : '/api');
 
 const StatCard = ({ icon: Icon, label, value, sub, color = 'var(--primary)', trend }) => (
   <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
