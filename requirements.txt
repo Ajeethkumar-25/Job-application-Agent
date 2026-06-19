@@ -1,0 +1,14 @@
+playwright
+pandas
+openpyxl
+python-dotenv
+langchain
+langchain-community
+PyMuPDF
+requests
+streamlit
+fastapi
+uvicorn
+python-multipart
+sqlalchemy
+alembic

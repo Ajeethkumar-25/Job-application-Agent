@@ -1,0 +1,45 @@
+[
+  {
+    "category": "Core Tech & Software Engineering",
+    "portals": [
+      {"name": "Instahyre", "url": "https://www.instahyre.com", "description": "AI-based matchmaking; zero-spam"},
+      {"name": "CutShort", "url": "https://cutshort.io", "description": "AI-driven search; direct chat with founders"},
+      {"name": "Hirist", "url": "https://hirist.tech", "description": "Dedicated IT and tech job board"},
+      {"name": "Geektrust", "url": "https://www.geektrust.in", "description": "Code‑first hiring; submit challenge"},
+      {"name": "TechGig", "url": "https://www.techgig.com", "description": "Job listings + coding contests"}
+    ]
+  },
+  {
+    "category": "Premium Tech Talent Networks",
+    "portals": [
+      {"name": "Tophire", "url": "https://tophire.co", "description": "Curated marketplace where companies bid to interview"},
+      {"name": "Uplers", "url": "https://uplers.com", "description": "Vetted remote developers for global projects"},
+      {"name": "Flexiple", "url": "https://flexiple.com", "description": "Hand‑picked freelance devs matched to startups"},
+      {"name": "Toptal", "url": "https://www.toptal.com", "description": "Top 3% freelance engineers"}
+    ]
+  },
+  {
+    "category": "Tech Startup & Growth",
+    "portals": [
+      {"name": "Wellfound (AngelList)", "url": "https://wellfound.com", "description": "Startup jobs with transparent salary/equity"},
+      {"name": "Work at a Startup (YC)", "url": "https://www.workatastartup.com", "description": "YC‑backed startup listings"}
+    ]
+  },
+  {
+    "category": "Freshers, Hackathons & Internships",
+    "portals": [
+      {"name": "Unstop", "url": "https://unstop.com", "description": "Hiring challenges, hackathons for students"},
+      {"name": "HackerEarth", "url": "https://www.hackerearth.com", "description": "Coding contests & job listings"},
+      {"name": "HackerRank", "url": "https://www.hackerrank.com", "description": "Skill assessments & talent marketplace"},
+      {"name": "Internshala (Tech)", "url": "https://internshala.com", "description": "Tech internships & entry‑level jobs"}
+    ]
+  },
+  {
+    "category": "General Portals (Tech Sections)",
+    "portals": [
+      {"name": "LinkedIn Jobs India", "url": "https://www.linkedin.com/jobs", "description": "Professional networking & job posts"},
+      {"name": "Naukri.com (IT)", "url": "https://www.naukri.com", "description": "Largest aggregator of IT roles"},
+      {"name": "Indeed India (Tech)", "url": "https://www.indeed.co.in", "description": "Aggregates tech vacancies"}
+    ]
+  }
+]
