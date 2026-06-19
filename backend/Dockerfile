@@ -14,6 +14,8 @@ WORKDIR /app/backend
 # Ensure data directory exists inside /app/backend/data
 RUN mkdir -p data
 
+ENV PYTHONPATH=/app/backend
+
 EXPOSE 8000
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
