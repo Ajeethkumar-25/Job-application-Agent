@@ -16,7 +16,7 @@ import SettingsPage from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 function AppRoutes() {
   const navigate = useNavigate();
