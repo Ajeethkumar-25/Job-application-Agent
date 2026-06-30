@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.db.models import User, SMTPSettings
+from app.db.models import User, SMTPSettings, Application
 from app.core.security import get_current_user
 from app.core.config import TEMP_DIR
 import app.services.tracker as tracker_service
@@ -73,34 +73,86 @@ def export_tracker(
     db: Session = Depends(get_db),
 ):
     apps = tracker_service.get_applications(current_user.id, db)
+    
+    # Categorize applications into folders
+    categorized = {}
     if not apps:
-        df = pd.DataFrame(columns=tracker_service.COLUMNS)
+        categorized["Other"] = []
     else:
-        df = pd.DataFrame(apps)
+        for app in apps:
+            # Exclude the "id" field in the Excel export columns
+            excel_app = {k: v for k, v in app.items() if k != "id"}
+            title = excel_app.get("Job Title", "")
+            
+            folder = "Other"
+            title_lower = title.lower()
+            if any(x in title_lower for x in ["ai", "machine learning", "ml", "deep learning", "llm"]):
+                folder = "AI Engineer"
+            elif any(x in title_lower for x in ["business analyst", "data analyst", "product analyst", "analyst"]):
+                folder = "Business Analyst"
+            elif any(x in title_lower for x in ["frontend", "react", "ui", "ux"]):
+                folder = "Frontend Engineer"
+            elif any(x in title_lower for x in ["full stack", "fullstack"]):
+                folder = "Full Stack Developer"
+            elif any(x in title_lower for x in ["backend", "node", "django", "python"]):
+                folder = "Backend Engineer"
+                
+            categorized.setdefault(folder, []).append(excel_app)
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"applications_tracker_{current_user.id}_{timestamp}.xlsx"
-    filepath = os.path.join(TEMP_DIR, filename)
-    df.to_excel(filepath, index=False, sheet_name="Applications")
+    import tempfile
+    import shutil
 
-    return FileResponse(
-        path=filepath,
-        filename=filename,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
+    with tempfile.TemporaryDirectory() as tmpdir:
+        for folder_name, folder_apps in categorized.items():
+            category_dir = os.path.join(tmpdir, folder_name)
+            os.makedirs(category_dir, exist_ok=True)
+            
+            if not folder_apps:
+                df = pd.DataFrame(columns=tracker_service.COLUMNS)
+            else:
+                df = pd.DataFrame(folder_apps)
+                
+            filepath = os.path.join(category_dir, "applications.xlsx")
+            df.to_excel(filepath, index=False, sheet_name=folder_name)
+            
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        zip_filename = f"applications_tracker_{current_user.id}_{timestamp}"
+        zip_filepath_base = os.path.join(TEMP_DIR, zip_filename)
+        
+        actual_zip_path = shutil.make_archive(zip_filepath_base, 'zip', tmpdir)
+        
+        return FileResponse(
+            path=actual_zip_path,
+            filename=f"{zip_filename}.zip",
+            media_type="application/zip",
+        )
 
 
 @router.post("/send-email")
 def send_tracker_email(
     email: str = Form(...),
+    app_ids: str = Form(None), # Comma-separated list of IDs, e.g. "1,2,5"
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    apps = tracker_service.get_applications(current_user.id, db)
-    if not apps:
+    query = db.query(Application).filter(Application.user_id == current_user.id)
+    if app_ids:
+        ids_list = [int(x.strip()) for x in app_ids.split(",") if x.strip()]
+        query = query.filter(Application.id.in_(ids_list))
+    db_apps = query.all()
+    
+    apps = [tracker_service._app_to_dict(app) for app in db_apps]
+    
+    # Exclude the "id" field in the Excel export columns
+    excel_apps = []
+    for app in apps:
+        excel_app = {k: v for k, v in app.items() if k != "id"}
+        excel_apps.append(excel_app)
+
+    if not excel_apps:
         df = pd.DataFrame(columns=tracker_service.COLUMNS)
     else:
-        df = pd.DataFrame(apps)
+        df = pd.DataFrame(excel_apps)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"applications_tracker_{current_user.id}_{timestamp}.xlsx"
@@ -111,7 +163,7 @@ def send_tracker_email(
     db_settings = db.query(SMTPSettings).filter(SMTPSettings.user_id == current_user.id).first()
 
     try:
-        send_application_list_email(email, filepath, apps, db_settings=db_settings)
+        send_application_list_email(email, filepath, excel_apps, db_settings=db_settings)
         return {"success": True}
     except ValueError as e:
         raise HTTPException(

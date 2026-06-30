@@ -1,7 +1,56 @@
 import time
 import random
+import re
+# pyrefly: ignore [missing-import]
 from playwright.sync_api import sync_playwright
 from app.services.bots.browser_bot import BrowserBot
+
+def matches_experience(job_exp_text: str, filter_exp: str) -> bool:
+    if filter_exp == "Any" or not job_exp_text:
+        return True
+    
+    nums = [int(s) for s in re.findall(r'\d+', job_exp_text)]
+    if not nums:
+        return True
+        
+    job_min = nums[0]
+    job_max = nums[1] if len(nums) > 1 else job_min
+    
+    if filter_exp == "0-1 years":
+        return job_min <= 1
+    elif filter_exp == "1-3 years":
+        return not (job_max < 1 or job_min > 3)
+    elif filter_exp == "3-5 years":
+        return not (job_max < 3 or job_min > 5)
+    elif filter_exp == "5+ years":
+        return job_max >= 5 or job_min >= 5
+        
+    return True
+
+def matches_recency(job_date_text: str, filter_recency: str) -> bool:
+    if filter_recency == "Any" or not job_date_text:
+        return True
+        
+    text = job_date_text.lower()
+    
+    if filter_recency == "Past 24 hours":
+        return any(x in text for x in ["hour", "just now", "today"]) or ("1 day ago" in text)
+    elif filter_recency == "Past week":
+        if any(x in text for x in ["hour", "just now", "today", "day ago"]):
+            return True
+        nums = [int(s) for s in re.findall(r'\d+', text)]
+        if nums and "day" in text:
+            return nums[0] <= 7
+        return False
+    elif filter_recency == "Past month":
+        if any(x in text for x in ["hour", "just now", "today", "day", "week"]):
+            return True
+        nums = [int(s) for s in re.findall(r'\d+', text)]
+        if nums and "day" in text:
+            return nums[0] <= 30
+        return False
+        
+    return True
 
 class NaukriBot(BrowserBot):
     def __init__(self, log_callback=None):
@@ -73,7 +122,8 @@ class NaukriBot(BrowserBot):
                 self.log("Extracting real job data from the page...")
                 job_elements = page.locator(".srp-jobtuple-wrapper, .jobTuple").all()
                 
-                for i, el in enumerate(job_elements[:5]): # Get the top 5 organic results
+                # Check up to 15 jobs to filter down to match the criteria
+                for i, el in enumerate(job_elements[:15]):
                     try:
                         job_title_el = el.locator(".title, .jobTupleHeader .title").first
                         job_title = job_title_el.inner_text().strip() if job_title_el.count() > 0 else f"{title} Role"
@@ -83,6 +133,24 @@ class NaukriBot(BrowserBot):
                         
                         link = job_title_el.get_attribute("href") if job_title_el.count() > 0 else f"https://www.naukri.com/job/{i}"
                         
+                        # Extract YOE
+                        exp_el = el.locator(".expwdth, .experience, .exp, [class*='exp']").first
+                        job_exp = exp_el.inner_text().strip() if exp_el.count() > 0 else ""
+                        
+                        # Extract Date
+                        date_el = el.locator(".job-postday, .postedAnchor, [class*='posted'], [class*='postday']").first
+                        job_date = date_el.inner_text().strip() if date_el.count() > 0 else ""
+                        
+                        # Enforce Experience filter
+                        if not matches_experience(job_exp, experience):
+                            self.log(f"Skipping '{job_title}' at '{company}' - experience '{job_exp}' does not match '{experience}'")
+                            continue
+                            
+                        # Enforce Recency filter
+                        if not matches_recency(job_date, recency):
+                            self.log(f"Skipping '{job_title}' at '{company}' - posted '{job_date}' does not match recency '{recency}'")
+                            continue
+                            
                         jobs.append({
                             "title": job_title,
                             "company": company,

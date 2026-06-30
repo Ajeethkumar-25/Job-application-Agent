@@ -74,13 +74,22 @@ class ResumeAnalyzer:
 
     def generate_outreach(self, resume_text, job_description, hr_name=""):
         prompt = f"""
-        Based on the applicant's resume and the job description below, draft a hyper-personalized LinkedIn connection request (under 300 characters).
-        If the recruiter's name ({hr_name}) is known, address them directly.
+        Analyze the company name and job description to infer the company's culture persona (e.g., fast-paced Startup vs. structured Corporate) and the HR/recruiter's persona based on the recruiter's details ({hr_name}).
+        
+        Based on the applicant's resume, the job description, and the inferred company & HR personas, draft a hyper-personalized LinkedIn connection request (under 300 characters).
+        
+        Tailor the tone dynamically:
+        - For Startup: Warm, enthusiastic, direct, highlighting growth and adaptability.
+        - For Corporate: Formal, structured, highlighting professional milestones and compliance.
+        - If addressing a Technical Hiring Manager: Highlight technical match and stack.
+        - If addressing an HR Recruiter: Highlight experience, role alignment, and enthusiasm.
+        
+        If the recruiter's name ({hr_name}) is known, address them directly (e.g., "Hi {hr_name}").
         
         Resume: {resume_text[:1500]}
         Job Description: {job_description[:1500]}
         
-        Provide ONLY the outreach message text, nothing else. No conversational filler.
+        Provide ONLY the final outreach message text, nothing else. No conversational filler, no introductory explanation, no placeholders (like [Company] or [My Name]). Ensure the message fits in under 300 characters.
         """
         try:
             response = self.llm.invoke([HumanMessage(content=prompt)])

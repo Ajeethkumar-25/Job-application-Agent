@@ -11,6 +11,7 @@ COLUMNS = [
 
 def _app_to_dict(app: Application) -> dict:
     return {
+        "id": app.id,
         "Source": app.source or "",
         "Company": app.company or "",
         "Job Title": app.job_title or "",

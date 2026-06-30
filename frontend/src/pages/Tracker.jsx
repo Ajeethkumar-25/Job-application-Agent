@@ -41,6 +41,16 @@ export default function Tracker() {
     saveStatus: 'idle',
     saveError: ''
   });
+  const [selectedAppIds, setSelectedAppIds] = useState([]);
+
+  useEffect(() => {
+    if (trackerData.length > 0) {
+      const allIds = trackerData.map(app => app.id).filter(id => id !== undefined);
+      setSelectedAppIds(allIds);
+    } else {
+      setSelectedAppIds([]);
+    }
+  }, [trackerData]);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -189,13 +199,15 @@ export default function Tracker() {
   const handleSendEmail = async (e) => {
     e.preventDefault();
     if (!emailModal.email) return;
+    if (selectedAppIds.length === 0) return;
 
     setEmailModal(prev => ({ ...prev, status: 'sending', message: '' }));
     try {
       const formData = new FormData();
       formData.append('email', emailModal.email);
+      formData.append('app_ids', selectedAppIds.join(','));
       await axios.post(`${API_BASE_URL}/tracker/send-email`, formData);
-      setEmailModal(prev => ({ ...prev, status: 'success', message: 'Applications tracker list has been sent successfully!' }));
+      setEmailModal(prev => ({ ...prev, status: 'success', message: `Applications tracker list (${selectedAppIds.length} selected) has been sent successfully!` }));
     } catch (err) {
       console.error(err);
       const errMsg = err.response?.data?.detail || 'Failed to send email. Please check your network and SMTP configuration.';
@@ -217,10 +229,11 @@ export default function Tracker() {
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button 
             className="btn btn-primary" 
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: selectedAppIds.length === 0 ? 0.6 : 1 }}
             onClick={handleOpenEmailModal}
+            disabled={selectedAppIds.length === 0}
           >
-            <Mail size={15} /> Send Email
+            <Mail size={15} /> Send Email ({selectedAppIds.length})
           </button>
           <button 
             className="btn" 
@@ -228,13 +241,13 @@ export default function Tracker() {
             onClick={() => {
               const link = document.createElement('a');
               link.href = `${API_BASE_URL}/tracker/export`;
-              link.download = 'applications_tracker.xlsx';
+              link.download = 'applications_tracker.zip';
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
             }}
           >
-            <Download size={15} /> Export CSV
+            <Download size={15} /> Export ZIP
           </button>
           <button className="btn btn-secondary" onClick={fetchTracker}>
             <Activity size={15} /> Refresh
@@ -304,6 +317,20 @@ export default function Tracker() {
           <table className="data-grid">
             <thead>
               <tr>
+                <th style={{ width: '40px', paddingLeft: '1.5rem' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={trackerData.length > 0 && selectedAppIds.length === trackerData.length} 
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedAppIds(trackerData.map(app => app.id).filter(id => id !== undefined));
+                      } else {
+                        setSelectedAppIds([]);
+                      }
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th>Source</th>
                 <th>Company</th>
                 <th>Job Title</th>
@@ -317,7 +344,7 @@ export default function Tracker() {
             <tbody>
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan="8" style={{ padding: '5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <td colSpan="9" style={{ padding: '5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     <div style={{ display: 'inline-flex', padding: '1rem', background: 'var(--bg-app)', border: '1px solid var(--border)', borderRadius: '50%', marginBottom: '1rem' }}>
                       <Activity size={24} style={{ color: 'var(--text-muted)' }} />
                     </div>
@@ -347,8 +374,24 @@ export default function Tracker() {
                     statusBorder = 'rgba(239, 68, 68, 0.2)';
                   }
 
+                  const isChecked = selectedAppIds.includes(app.id);
+
                   return (
-                    <tr key={idx}>
+                    <tr key={idx} style={{ background: isChecked ? 'var(--primary-glow)' : 'transparent' }}>
+                      <td style={{ paddingLeft: '1.5rem' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={isChecked} 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedAppIds(prev => [...prev, app.id]);
+                            } else {
+                              setSelectedAppIds(prev => prev.filter(id => id !== app.id));
+                            }
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </td>
                       <td>
                         <span style={{
                           padding: '0.25rem 0.65rem', borderRadius: '6px',
