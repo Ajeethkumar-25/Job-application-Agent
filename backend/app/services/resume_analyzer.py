@@ -22,7 +22,9 @@ class ResumeAnalyzer:
             model=model_name,
             api_key=api_key,
             base_url=base_url,
-            temperature=0.1
+            temperature=0.1,
+            timeout=10,
+            max_retries=0
         )
 
     def extract_text(self, pdf_path):
