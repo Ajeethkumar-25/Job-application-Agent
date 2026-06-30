@@ -335,7 +335,7 @@ export default function Launchpad({
           <button 
             className="btn btn-primary" 
             onClick={handleStartAgent}
-            disabled={isRunning || selectedPortals.length === 0 || !targetTitles || !selectedResume}
+            disabled={isRunning || selectedPortals.length === 0 || !targetTitles}
             style={{ width: '100%', padding: '1rem', fontSize: '1rem', borderRadius: '10px', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
           >
             {isRunning ? (

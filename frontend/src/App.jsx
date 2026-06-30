@@ -112,10 +112,6 @@ function AppRoutes() {
       alert('Please select at least one portal and enter job titles.');
       return;
     }
-    if (!selectedResume) {
-      alert('Please upload and select a Knowledge Base (Resume PDF).');
-      return;
-    }
 
     setLogs([]);
     setIsRunning(true);
