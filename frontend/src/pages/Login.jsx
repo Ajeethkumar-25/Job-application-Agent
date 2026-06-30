@@ -40,26 +40,26 @@ export default function Login() {
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'var(--bg-app)', padding: '2rem', position: 'relative', overflow: 'hidden'
-    }}>
+    }} className="fade-up">
       {/* Background blobs */}
-      <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,99,235,0.08), transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, var(--primary-glow), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, var(--accent-glow), transparent 70%)', pointerEvents: 'none' }} />
 
-      <div style={{ width: '100%', maxWidth: '420px', zIndex: 1 }}>
+      <div style={{ width: '100%', maxWidth: '400px', zIndex: 1 }}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            display: 'inline-flex', padding: '0.875rem', borderRadius: '16px',
+            display: 'inline-flex', padding: '0.75rem', borderRadius: '14px',
             background: 'linear-gradient(135deg, var(--primary), var(--accent))',
             boxShadow: '0 8px 24px var(--primary-glow)', marginBottom: '1rem'
           }}>
-            <Sparkles size={28} color="white" />
+            <Sparkles size={24} color="white" />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
             Linker<span className="text-gradient">AI</span>
           </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.95rem' }}>
-            Sign in to your account
+          <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.85rem', fontWeight: 600 }}>
+            Sign in to automate your job application cycle.
           </p>
         </div>
 
@@ -72,10 +72,10 @@ export default function Login() {
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                 padding: '0.75rem 1rem', borderRadius: '8px',
-                background: '#ECFDF5', border: '1px solid #A7F3D0', color: 'var(--success)',
-                fontSize: '0.875rem'
+                background: 'var(--accent-glow)', border: '1px solid var(--accent)', color: 'var(--success)',
+                fontSize: '0.82rem', fontWeight: 600
               }}>
-                <Sparkles size={16} />
+                <Sparkles size={14} />
                 {location.state.message}
               </div>
             )}
@@ -85,10 +85,10 @@ export default function Login() {
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                 padding: '0.75rem 1rem', borderRadius: '8px',
-                background: '#FEF2F2', border: '1px solid #FECACA', color: 'var(--danger)',
-                fontSize: '0.875rem'
+                background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger)',
+                fontSize: '0.82rem', fontWeight: 600
               }}>
-                <AlertCircle size={16} />
+                <AlertCircle size={14} />
                 {error}
               </div>
             )}
@@ -97,7 +97,7 @@ export default function Login() {
             <div>
               <label className="form-label">Email address</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <Mail size={15} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   id="login-email"
                   type="email"
@@ -116,7 +116,7 @@ export default function Login() {
             <div>
               <label className="form-label">Password</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <Lock size={15} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   id="login-password"
                   type={showPwd ? 'text' : 'password'}
@@ -130,9 +130,9 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPwd(s => !s)}
-                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem' }}
+                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem', display: 'flex' }}
                 >
-                  {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
@@ -143,11 +143,11 @@ export default function Login() {
               type="submit"
               className="btn btn-primary"
               disabled={loading}
-              style={{ width: '100%', padding: '0.875rem', fontSize: '1rem', borderRadius: '10px', marginTop: '0.25rem' }}
+              style={{ width: '100%', padding: '0.8rem', fontSize: '0.95rem', borderRadius: '10px', marginTop: '0.25rem' }}
             >
               {loading ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
+                  <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
                   Signing in...
                 </span>
               ) : 'Sign In'}
@@ -156,9 +156,9 @@ export default function Login() {
         </div>
 
         {/* Register link */}
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
             Create one →
           </Link>
         </p>

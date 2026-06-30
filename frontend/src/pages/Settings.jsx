@@ -34,7 +34,9 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState({ name: '', email: '', title: '' });
   const [notifications, setNotifications] = useState({ applicationSent: true, weeklyReport: true, agentErrors: true, newMatches: false });
   const [ats, setAts] = useState({ threshold: 85, autoApply: false, skipRedirect: true });
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
@@ -42,26 +44,33 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    window.dispatchEvent(new Event('storage'));
+  };
+
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }} className="fade-up">
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Settings size={28} color="var(--primary)" /> Settings
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+            <Settings size={24} color="var(--primary)" /> Settings
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Manage your account and agent preferences.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Manage your account and agent preferences.</p>
         </div>
         <button
           className="btn btn-primary"
           onClick={handleSave}
-          style={{ padding: '0.7rem 1.5rem' }}
+          style={{ padding: '0.65rem 1.5rem' }}
         >
           {saved ? (
             <><span>✓</span> Saved!</>
           ) : (
-            <><Save size={16} /> Save Changes</>
+            <><Save size={15} /> Save Changes</>
           )}
         </button>
       </div>
@@ -103,7 +112,7 @@ export default function SettingsPage() {
               onChange={e => setAts(a => ({ ...a, threshold: +e.target.value }))}
               style={{ width: '120px', accentColor: 'var(--primary)' }}
             />
-            <span style={{ minWidth: '40px', fontWeight: 600, color: 'var(--primary)', fontSize: '0.95rem' }}>{ats.threshold}%</span>
+            <span style={{ minWidth: '40px', fontWeight: 700, color: 'var(--primary)', fontSize: '0.9rem' }}>{ats.threshold}%</span>
           </div>
         </SettingRow>
         <SettingRow label="Auto-Apply Mode" description="Agent will autonomously submit applications.">
@@ -132,17 +141,17 @@ export default function SettingsPage() {
 
       {/* Appearance */}
       <Section title="Appearance" icon={Palette}>
-        <SettingRow label="Interface Theme" description="Light mode is recommended for this SaaS design.">
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {['light', 'dark', 'system'].map(t => (
+        <SettingRow label="Interface Theme" description="Choose light or dark mode theme colors.">
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            {['light', 'dark'].map(t => (
               <button
                 key={t}
-                onClick={() => setTheme(t)}
+                onClick={() => handleThemeChange(t)}
                 style={{
-                  padding: '0.4rem 0.9rem', borderRadius: '8px', fontSize: '0.82rem',
-                  fontWeight: 500, cursor: 'pointer', border: '1px solid',
+                  padding: '0.4rem 0.9rem', borderRadius: '8px', fontSize: '0.78rem',
+                  fontWeight: 700, cursor: 'pointer', border: '1px solid',
                   borderColor: theme === t ? 'var(--primary)' : 'var(--border)',
-                  background: theme === t ? 'var(--primary-glow)' : 'white',
+                  background: theme === t ? 'var(--primary-glow)' : 'var(--bg-card)',
                   color: theme === t ? 'var(--primary)' : 'var(--text-muted)',
                   transition: 'all 0.2s'
                 }}
@@ -165,13 +174,13 @@ export default function SettingsPage() {
               value="••••••••••••••••"
               readOnly
             />
-            <button className="btn btn-secondary" style={{ padding: '0.6rem 0.75rem', gap: 0 }}>
-              <Key size={15} />
+            <button className="btn btn-secondary" style={{ padding: '0.55rem', gap: 0, border: '1px solid var(--border)' }}>
+              <Key size={14} />
             </button>
           </div>
         </SettingRow>
         <SettingRow label="Session" description="Current active session.">
-          <span style={{ fontSize: '0.82rem', color: 'var(--success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <span style={{ fontSize: '0.82rem', color: 'var(--success)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} />
             Active — localhost
           </span>

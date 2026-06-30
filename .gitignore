@@ -4,11 +4,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.db
-backend/data/linker.db
-backend/temp/
-backend/resumes/
+backend/data/
 backend/session_data/
+backend/temp/
 backend/tailored_resumes/
+backend/resumes/
+
 
 # Node/React
 node_modules/

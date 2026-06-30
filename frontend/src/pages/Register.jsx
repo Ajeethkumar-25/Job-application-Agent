@@ -57,25 +57,25 @@ export default function Register() {
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'var(--bg-app)', padding: '2rem', position: 'relative', overflow: 'hidden'
-    }}>
-      <div style={{ position: 'fixed', top: '-20%', right: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', bottom: '-20%', left: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,99,235,0.08), transparent 70%)', pointerEvents: 'none' }} />
+    }} className="fade-up">
+      <div style={{ position: 'fixed', top: '-20%', right: '-10%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, var(--accent-glow), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', bottom: '-20%', left: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, var(--primary-glow), transparent 70%)', pointerEvents: 'none' }} />
 
-      <div style={{ width: '100%', maxWidth: '440px', zIndex: 1 }}>
+      <div style={{ width: '100%', maxWidth: '400px', zIndex: 1 }}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            display: 'inline-flex', padding: '0.875rem', borderRadius: '16px',
+            display: 'inline-flex', padding: '0.75rem', borderRadius: '14px',
             background: 'linear-gradient(135deg, var(--primary), var(--accent))',
             boxShadow: '0 8px 24px var(--primary-glow)', marginBottom: '1rem'
           }}>
-            <Sparkles size={28} color="white" />
+            <Sparkles size={24} color="white" />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
             Linker<span className="text-gradient">AI</span>
           </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.95rem' }}>
-            Create your account
+          <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.85rem', fontWeight: 600 }}>
+            Create your account to start applying.
           </p>
         </div>
 
@@ -83,8 +83,8 @@ export default function Register() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
             {error && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderRadius: '8px', background: '#FEF2F2', border: '1px solid #FECACA', color: 'var(--danger)', fontSize: '0.875rem' }}>
-                <AlertCircle size={16} /> {error}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger)', fontSize: '0.82rem', fontWeight: 600 }}>
+                <AlertCircle size={14} /> {error}
               </div>
             )}
 
@@ -92,7 +92,7 @@ export default function Register() {
             <div>
               <label className="form-label">Full Name</label>
               <div style={{ position: 'relative' }}>
-                <User size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <User size={15} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input id="reg-name" type="text" className="form-input" style={{ paddingLeft: '2.5rem' }}
                   placeholder="Your name" value={form.full_name}
                   onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
@@ -104,7 +104,7 @@ export default function Register() {
             <div>
               <label className="form-label">Email address</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <Mail size={15} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input id="reg-email" type="email" className="form-input" style={{ paddingLeft: '2.5rem' }}
                   placeholder="you@example.com" value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
@@ -115,23 +115,23 @@ export default function Register() {
             <div>
               <label className="form-label">Password</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <Lock size={15} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input id="reg-password" type={showPwd ? 'text' : 'password'} className="form-input"
                   style={{ paddingLeft: '2.5rem', paddingRight: '2.75rem' }}
                   placeholder="Min 8 characters" value={form.password}
                   onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
                 <button type="button" onClick={() => setShowPwd(s => !s)}
-                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem' }}>
-                  {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.2rem', display: 'flex' }}>
+                  {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
               {/* Strength bar */}
               {passwordStrength && (
-                <div style={{ marginTop: '0.4rem' }}>
-                  <div style={{ height: '4px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <div style={{ height: '4px', background: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${passwordStrength.pct}%`, background: passwordStrength.color, transition: 'all 0.3s', borderRadius: '4px' }} />
                   </div>
-                  <span style={{ fontSize: '0.72rem', color: passwordStrength.color, fontWeight: 600 }}>{passwordStrength.label}</span>
+                  <span style={{ fontSize: '0.72rem', color: passwordStrength.color, fontWeight: 700, marginTop: '0.15rem', display: 'inline-block' }}>{passwordStrength.label}</span>
                 </div>
               )}
             </div>
@@ -140,21 +140,21 @@ export default function Register() {
             <div>
               <label className="form-label">Confirm Password</label>
               <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <Lock size={15} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input id="reg-confirm" type="password" className="form-input" style={{ paddingLeft: '2.5rem' }}
                   placeholder="Re-enter password" value={form.confirm}
                   onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))} required />
                 {form.confirm && form.confirm === form.password && (
-                  <CheckCircle2 size={16} color="var(--success)" style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
+                  <CheckCircle2 size={15} color="var(--success)" style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
                 )}
               </div>
             </div>
 
             <button id="reg-submit" type="submit" className="btn btn-primary" disabled={loading}
-              style={{ width: '100%', padding: '0.875rem', fontSize: '1rem', borderRadius: '10px', marginTop: '0.25rem' }}>
+              style={{ width: '100%', padding: '0.8rem', fontSize: '0.95rem', borderRadius: '10px', marginTop: '0.25rem' }}>
               {loading ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                  <span style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
+                  <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
                   Creating account...
                 </span>
               ) : 'Create Account'}
@@ -162,9 +162,9 @@ export default function Register() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
           Already have an account?{' '}
-          <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+          <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
             Sign in →
           </Link>
         </p>

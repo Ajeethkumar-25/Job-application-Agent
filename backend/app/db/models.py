@@ -46,3 +46,17 @@ class Application(Base):
     drafted_message = Column(String)
     improvement_suggestions = Column(String)
     resume_used = Column(String)
+
+
+class SMTPSettings(Base):
+    __tablename__ = 'smtp_settings'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), unique=True, nullable=False, index=True)
+    
+    smtp_host = Column(String, nullable=False)
+    smtp_port = Column(Integer, default=587)
+    smtp_user = Column(String, nullable=False)
+    smtp_password = Column(String, nullable=False)
+    smtp_from = Column(String, nullable=True)
+
