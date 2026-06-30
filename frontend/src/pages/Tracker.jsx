@@ -44,12 +44,8 @@ export default function Tracker() {
   const [selectedAppIds, setSelectedAppIds] = useState([]);
 
   useEffect(() => {
-    if (trackerData.length > 0) {
-      const allIds = trackerData.map(app => app.id).filter(id => id !== undefined);
-      setSelectedAppIds(allIds);
-    } else {
-      setSelectedAppIds([]);
-    }
+    const validIds = trackerData.map(app => app.id);
+    setSelectedAppIds(prev => prev.filter(id => validIds.includes(id)));
   }, [trackerData]);
 
   // Pagination State
