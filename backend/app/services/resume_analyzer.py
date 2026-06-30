@@ -2,6 +2,7 @@
 import fitz  # PyMuPDF
 import json
 import os
+import re
 # pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 # pyrefly: ignore [missing-import]
@@ -68,11 +69,122 @@ class ResumeAnalyzer:
             return json.loads(cleaned)
         except Exception as e:
             print(f"Error communicating with Bedrock for analyze_resume: {e}")
+            return self._fallback_analyze_resume(text)
+
+    def _fallback_analyze_resume(self, text: str) -> dict:
+        if not text:
             return {
-                "skills": ["JavaScript", "Python", "React", "Node.js"],
-                "experience_years": 3,
-                "target_job_titles": ["Frontend Engineer", "Full Stack Developer", "Software Engineer"]
+                "skills": ["Communication", "Problem Solving"],
+                "experience_years": 0,
+                "target_job_titles": ["Associate Developer", "Junior Analyst"]
             }
+
+        text_lower = text.lower()
+        
+        # 1. Dynamic Skills Extraction
+        COMMON_SKILLS = [
+            # Tech
+            "python", "javascript", "typescript", "react", "node.js", "node", "html", "css", 
+            "sql", "postgresql", "mysql", "mongodb", "aws", "docker", "kubernetes", "git", 
+            "c++", "java", "c#", "go", "php", "ruby", "rust",
+            # AI / ML
+            "machine learning", "deep learning", "nlp", "computer vision", "tensorflow", 
+            "pytorch", "scikit-learn", "data science", "analytics", "llm", "genai", "prompt engineering",
+            # Business Analyst / Product
+            "business analysis", "requirements gathering", "sdlc", "functional specifications", 
+            "stakeholder management", "agile", "scrum", "jira", "confluence", "tableau", 
+            "power bi", "excel", "product management", "market research", "data modeling"
+        ]
+        
+        found_skills = []
+        for skill in COMMON_SKILLS:
+            # Match whole word or specific substring
+            if f" {skill} " in f" {text_lower} " or f"\n{skill}" in text_lower or f"{skill}\n" in text_lower or f" {skill}," in text_lower or f" {skill}." in text_lower:
+                # Format skill nicely (capitalize first letter of each word)
+                nice_name = " ".join([w.capitalize() for w in skill.split()])
+                # Special cases
+                if nice_name.lower() == "node.js":
+                    nice_name = "Node.js"
+                elif nice_name.lower() == "node":
+                    nice_name = "Node.js"
+                elif nice_name.lower() == "c++":
+                    nice_name = "C++"
+                elif nice_name.lower() == "c#":
+                    nice_name = "C#"
+                elif nice_name.lower() == "sdlc":
+                    nice_name = "SDLC"
+                elif nice_name.lower() == "nlp":
+                    nice_name = "NLP"
+                elif nice_name.lower() == "llm":
+                    nice_name = "LLM"
+                elif nice_name.lower() == "genai":
+                    nice_name = "GenAI"
+                
+                if nice_name not in found_skills:
+                    found_skills.append(nice_name)
+
+        # Default fallback skills if none found
+        if not found_skills:
+            found_skills = ["Analytical Thinking", "Problem Solving", "Team Collaboration"]
+        else:
+            # limit to top 8 skills
+            found_skills = found_skills[:8]
+
+        # 2. Dynamic YOE Extraction
+        experience_years = 2 # default
+        # Try to find things like "3+ years", "5 years", "10+ Yrs", "experience: 4 years"
+        match = re.search(r'(\d+)\+?\s*(?:yrs|years?)\s*(?:of\s*)?(?:exp|experience)', text_lower)
+        if match:
+            try:
+                experience_years = int(match.group(1))
+            except ValueError:
+                pass
+        else:
+            # Alternative YOE search
+            match2 = re.search(r'(?:exp|experience)\s*:\s*(\d+)', text_lower)
+            if match2:
+                try:
+                    experience_years = int(match2.group(1))
+                except ValueError:
+                    pass
+
+        # 3. Dynamic Target Job Titles Selection
+        # Score different career paths based on skill matches
+        scores = {
+            "AI Engineer": sum(1 for s in found_skills if s.lower() in ["python", "machine learning", "deep learning", "nlp", "llm", "tensorflow", "pytorch", "genai", "prompt engineering"]),
+            "Business Analyst": sum(1 for s in found_skills if s.lower() in ["business analysis", "requirements gathering", "sdlc", "functional specifications", "stakeholder management", "agile", "scrum", "jira", "excel", "tableau", "power bi", "product management"]),
+            "Frontend Engineer": sum(1 for s in found_skills if s.lower() in ["javascript", "typescript", "react", "html", "css"]),
+            "Backend Engineer": sum(1 for s in found_skills if s.lower() in ["python", "node.js", "sql", "postgresql", "mysql", "mongodb", "aws", "docker", "kubernetes", "go", "java"]),
+            "Software Engineer": sum(1 for s in found_skills if s.lower() in ["c++", "java", "c#", "git", "go", "rust", "javascript", "python"]) + 1 # small base score
+        }
+        
+        # Sort paths by score descending
+        sorted_paths = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+        top_role = sorted_paths[0][0]
+        
+        # Build recommended roles list based on the top role
+        if top_role == "Business Analyst":
+            roles = ["Business Analyst", "Data Analyst", "Product Analyst", "Systems Analyst"]
+        elif top_role == "AI Engineer":
+            roles = ["AI Engineer", "Machine Learning Engineer", "Data Scientist", "Software Engineer (AI)"]
+        elif top_role == "Frontend Engineer":
+            roles = ["Frontend Engineer", "Full Stack Developer", "Web Developer", "React Developer"]
+        elif top_role == "Backend Engineer":
+            roles = ["Backend Engineer", "Software Engineer", "Cloud Engineer", "Database Developer"]
+        else:
+            roles = ["Software Engineer", "Full Stack Developer", "Backend Engineer", "Application Developer"]
+
+        # If YOE is high, append "Senior" or "Lead" to titles
+        if experience_years >= 5:
+            roles = [f"Senior {r}" if not r.startswith("Senior") else r for r in roles]
+        elif experience_years >= 8:
+            roles = [f"Lead {r}" if not r.startswith("Lead") else r for r in roles]
+
+        return {
+            "skills": found_skills,
+            "experience_years": experience_years,
+            "target_job_titles": roles[:3] # return top 3 roles
+        }
 
     def generate_outreach(self, resume_text, job_description, hr_name=""):
         prompt = f"""
