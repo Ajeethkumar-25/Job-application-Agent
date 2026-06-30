@@ -98,14 +98,19 @@ class ResumeAnalyzer:
         
         found_skills = []
         for skill in COMMON_SKILLS:
-            # Match whole word or specific substring
-            if f" {skill} " in f" {text_lower} " or f"\n{skill}" in text_lower or f"{skill}\n" in text_lower or f" {skill}," in text_lower or f" {skill}." in text_lower:
-                # Format skill nicely (capitalize first letter of each word)
+            pattern = rf"\b{re.escape(skill)}\b"
+            if skill == "c++":
+                pattern = r"c\+\+"
+            elif skill == "c#":
+                pattern = r"c\#"
+            elif skill == "node.js":
+                pattern = r"node\.js"
+            elif skill == "node":
+                pattern = r"\bnode\b"
+                
+            if re.search(pattern, text_lower):
                 nice_name = " ".join([w.capitalize() for w in skill.split()])
-                # Special cases
-                if nice_name.lower() == "node.js":
-                    nice_name = "Node.js"
-                elif nice_name.lower() == "node":
+                if nice_name.lower() == "node.js" or nice_name.lower() == "node":
                     nice_name = "Node.js"
                 elif nice_name.lower() == "c++":
                     nice_name = "C++"
@@ -123,46 +128,64 @@ class ResumeAnalyzer:
                 if nice_name not in found_skills:
                     found_skills.append(nice_name)
 
-        # Default fallback skills if none found
         if not found_skills:
             found_skills = ["Analytical Thinking", "Problem Solving", "Team Collaboration"]
         else:
-            # limit to top 8 skills
             found_skills = found_skills[:8]
 
-        # 2. Dynamic YOE Extraction
-        experience_years = 2 # default
-        # Try to find things like "3+ years", "5 years", "10+ Yrs", "experience: 4 years"
-        match = re.search(r'(\d+)\+?\s*(?:yrs|years?)\s*(?:of\s*)?(?:exp|experience)', text_lower)
-        if match:
-            try:
-                experience_years = int(match.group(1))
-            except ValueError:
-                pass
-        else:
-            # Alternative YOE search
-            match2 = re.search(r'(?:exp|experience)\s*:\s*(\d+)', text_lower)
-            if match2:
-                try:
-                    experience_years = int(match2.group(1))
-                except ValueError:
-                    pass
+        # 2. Dynamic YOE Extraction by summing date ranges found in the resume
+        months_map = {
+            "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+            "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12
+        }
+        
+        # Match e.g. "Jun 2025 – Sep 2025" or "Feb 2023 - Jul 2023"
+        date_pattern = r'([A-Za-z]{3,9})\s*(\d{4})\s*[-–—to\s]+\s*([A-Za-z]{3,9}\s*\d{4}|present|current|now)'
+        date_matches = re.findall(date_pattern, text_lower)
+        
+        total_months = 0
+        for start_m_str, start_y_str, end_str in date_matches:
+            start_m_key = start_m_str[:3]
+            if start_m_key not in months_map:
+                continue
+            start_month = months_map[start_m_key]
+            start_year = int(start_y_str)
+            
+            end_str = end_str.strip()
+            if any(x in end_str for x in ["present", "current", "now"]):
+                end_month = 6
+                end_year = 2026
+            else:
+                end_m_match = re.search(r'([a-z]{3,9})', end_str)
+                end_y_match = re.search(r'(\d{4})', end_str)
+                if not end_m_match or not end_y_match:
+                    continue
+                end_m_key = end_m_match.group(1)[:3]
+                if end_m_key not in months_map:
+                    continue
+                end_month = months_map[end_m_key]
+                end_year = int(end_y_match.group(1))
+                
+            months = (end_year - start_year) * 12 + (end_month - start_month) + 1
+            if 0 < months < 120:  # Exclude education or massive outliers
+                total_months += months
+                
+        experience_years = int(round(total_months / 12.0))
+        if experience_years > 20:
+            experience_years = 2
 
         # 3. Dynamic Target Job Titles Selection
-        # Score different career paths based on skill matches
         scores = {
             "AI Engineer": sum(1 for s in found_skills if s.lower() in ["python", "machine learning", "deep learning", "nlp", "llm", "tensorflow", "pytorch", "genai", "prompt engineering"]),
             "Business Analyst": sum(1 for s in found_skills if s.lower() in ["business analysis", "requirements gathering", "sdlc", "functional specifications", "stakeholder management", "agile", "scrum", "jira", "excel", "tableau", "power bi", "product management"]),
             "Frontend Engineer": sum(1 for s in found_skills if s.lower() in ["javascript", "typescript", "react", "html", "css"]),
             "Backend Engineer": sum(1 for s in found_skills if s.lower() in ["python", "node.js", "sql", "postgresql", "mysql", "mongodb", "aws", "docker", "kubernetes", "go", "java"]),
-            "Software Engineer": sum(1 for s in found_skills if s.lower() in ["c++", "java", "c#", "git", "go", "rust", "javascript", "python"]) + 1 # small base score
+            "Software Engineer": sum(1 for s in found_skills if s.lower() in ["c++", "java", "c#", "git", "go", "rust", "javascript", "python"]) + 1
         }
         
-        # Sort paths by score descending
         sorted_paths = sorted(scores.items(), key=lambda item: item[1], reverse=True)
         top_role = sorted_paths[0][0]
         
-        # Build recommended roles list based on the top role
         if top_role == "Business Analyst":
             roles = ["Business Analyst", "Data Analyst", "Product Analyst", "Systems Analyst"]
         elif top_role == "AI Engineer":
@@ -174,16 +197,18 @@ class ResumeAnalyzer:
         else:
             roles = ["Software Engineer", "Full Stack Developer", "Backend Engineer", "Application Developer"]
 
-        # If YOE is high, append "Senior" or "Lead" to titles
+        # Adjust role tier prefix dynamically
         if experience_years >= 5:
             roles = [f"Senior {r}" if not r.startswith("Senior") else r for r in roles]
         elif experience_years >= 8:
             roles = [f"Lead {r}" if not r.startswith("Lead") else r for r in roles]
+        elif experience_years == 0:
+            roles = [f"Junior {r}" if not r.startswith("Junior") else r for r in roles]
 
         return {
             "skills": found_skills,
             "experience_years": experience_years,
-            "target_job_titles": roles[:3] # return top 3 roles
+            "target_job_titles": roles[:3]
         }
 
     def generate_outreach(self, resume_text, job_description, hr_name=""):
